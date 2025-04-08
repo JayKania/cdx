@@ -30,15 +30,16 @@ func renderList(startIndex int, selected int, options []string, visibleCount int
 	for i := startIndex; i < endIndex; i++ {
 		fmt.Print(clear_line)
 		fmt.Print(carriage_return)
+
+		width, _, _ := term.GetSize(int(os.Stdout.Fd()))
+		visibleText := truncateToWidth(options[i], width-2) // -2 for "> " or padding
+
 		if i == selected {
-			fmt.Printf("> %s%s%s\n", color_green, options[i], color_reset)
+			fmt.Printf("> %s%s%s\n", color_green, visibleText, color_reset)
 		} else {
-			fmt.Printf("  %s\n", options[i])
+			fmt.Printf("  %s\n", visibleText)
 		}
 	}
-
-	fmt.Print(cursor_top_left)
-	fmt.Print(cursor_hide)
 }
 
 // enableRawMode switches the terminal to raw mode.
