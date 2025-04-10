@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 )
 
 func truncateToWidth(s string, width int) string {
@@ -35,4 +36,18 @@ func findIndexOfOption(options []string, option string) int {
 		}
 	}
 	return -1
+}
+
+func isPrintable(b byte) bool {
+	return b >= 32 && b <= 126 // printable ASCII range
+}
+
+func sanitizeInput(input string) string {
+	safe := ""
+	for _, r := range input {
+		if r >= 32 && r <= 126 && !strings.ContainsRune(`;&|><\`+"`"+`"'$*~(){}[]`, r) {
+			safe += string(r)
+		}
+	}
+	return safe
 }

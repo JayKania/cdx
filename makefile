@@ -3,6 +3,10 @@
 build:
 	go build -o build/cdx *.go
 
+build-home:
+	rm -f ~/cdx
+	go build -o ~/cdx *.go
+
 build-all:
 	GOOS=linux GOARCH=amd64 go build -o build/cdx-linux-amd64 *.go
 	GOOS=darwin GOARCH=amd64 go build -o build/cdx-darwin-amd64 *.go
@@ -17,6 +21,5 @@ run:
 test:
 	go test ./...
 
-build-home:
-	rm -f ~/cdx
-	go build -o ~/cdx *.go
+fmt:
+	go fmt *.go

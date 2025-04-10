@@ -41,14 +41,16 @@ func main() {
 	selectedOption := 0
 	startIndex := 0
 	options := buildOptions()
+	matches := []string{}
 	_, height, _ := term.GetSize(int(os.Stdout.Fd()))
-	visibleCount := min(height-2, len(options))
-	renderList(startIndex, selectedOption, options, visibleCount)
-
-	// TODO: Figure out a better way to handle resizing, ranther than using this pointer spaghetti
-	handleReszing(&visibleCount, &selectedOption, &startIndex, &options)
+	visibleCount := min(height-3, len(options))
+	renderList(startIndex, selectedOption, options, visibleCount, "")
 
 	buf := make([]byte, 32)
+	searchTerm := ""
+	
+	// TODO: Figure out a better way to handle resizing, ranther than using this pointer spaghetti
+	handleReszing(&visibleCount, &selectedOption, &startIndex, &options, &searchTerm)
 
 	for {
 		n, err := os.Stdin.Read(buf)
@@ -63,6 +65,11 @@ func main() {
 
 		// Handle navigation
 		if n == 3 && buf[0] == 0x1b && buf[1] == '[' {
+			selectedList := options
+			if len(matches) > 0 {
+				selectedList = matches
+			}
+
 			switch buf[2] {
 			case 'A': // Up
 				if selectedOption > 0 {
@@ -71,11 +78,12 @@ func main() {
 						startIndex--
 					}
 				} else {
-					selectedOption = len(options) - 1
-					startIndex = max(len(options)-visibleCount, 0)
+					selectedOption = len(selectedList) - 1
+					startIndex = max(len(selectedList)-visibleCount, 0)
 				}
+				renderList(startIndex, selectedOption, selectedList, visibleCount, searchTerm)
 			case 'B': // Down
-				if selectedOption < len(options)-1 {
+				if selectedOption < len(selectedList)-1 {
 					selectedOption++
 					if selectedOption >= startIndex+visibleCount {
 						startIndex++
@@ -84,16 +92,19 @@ func main() {
 					selectedOption = 0
 					startIndex = 0
 				}
+				renderList(startIndex, selectedOption, selectedList, visibleCount, searchTerm)
 			case 'C': // Right
 				cwd, _ := os.Getwd()
-				if hasSubdirs(cwd + "/" + options[selectedOption]) {
-					os.Chdir(cwd + "/" + options[selectedOption])
+				if hasSubdirs(cwd + "/" + selectedList[selectedOption]) {
+					os.Chdir(cwd + "/" + selectedList[selectedOption])
 					selectedOption = 0
 					startIndex = 0
 					options = buildOptions()
 					_, height, _ = term.GetSize(int(os.Stdout.Fd()))
-					visibleCount = min(height-2, len(options))
-					renderList(startIndex, selectedOption, options, visibleCount)
+					visibleCount = min(height-3, len(options))
+					searchTerm = ""
+					matches = matches[:0]
+					renderList(startIndex, selectedOption, options, visibleCount, searchTerm)
 				}
 			case 'D': // Left
 				currentPath, _ := filepath.Abs(".")
@@ -105,12 +116,54 @@ func main() {
 					selectedOption = 0
 				}
 				_, height, _ := term.GetSize(int(os.Stdout.Fd()))
-				visibleCount = min(height-2, len(options))
+				visibleCount = min(height-3, len(options))
 				startIndex = max(0, selectedOption-visibleCount+1)
-				renderList(startIndex, selectedOption, options, visibleCount)
+				matches = matches[:0]
+				searchTerm = ""
+				renderList(startIndex, selectedOption, options, visibleCount, searchTerm)
 			}
+		}
+		
+		// Handle input
+		if n == 1 && isPrintable(buf[0]) {
+			searchTerm += sanitizeInput(string(buf[0]))
+			matches = search(searchTerm, options)
+			_, height, _ := term.GetSize(int(os.Stdout.Fd()))
+			if len(matches) > 0 {
+				visibleCount = min(height-3, len(matches))
+				startIndex = 0;
+				selectedOption = 0;
+				renderList(startIndex, selectedOption, matches, visibleCount, searchTerm)
+			} else {
+				visibleCount = min(height-3, len(options))
+				startIndex = max(0, selectedOption-visibleCount+1)
+				renderList(startIndex, selectedOption, options, visibleCount, searchTerm)
+			}
+		}
 
-			renderList(startIndex, selectedOption, options, visibleCount)
+		// Handle backspace
+		if n == 1 && buf[0] == 0x7f {
+			if len(searchTerm) > 0 {
+				searchTerm = searchTerm[:len(searchTerm)-1]
+				matches = search(searchTerm, options)
+				_, height, _ := term.GetSize(int(os.Stdout.Fd()))
+				if len(matches) > 0 && len(searchTerm) > 0 {
+					visibleCount = min(height-3, len(matches))
+					startIndex = 0;
+					selectedOption = 0;
+					renderList(startIndex, selectedOption, matches, visibleCount, searchTerm)
+				} else {
+					matches = matches[:0]
+					visibleCount = min(height-3, len(options))
+					startIndex = max(0, selectedOption-visibleCount+1)
+					renderList(startIndex, selectedOption, options, visibleCount, searchTerm)
+				}
+			} else {
+				matches = matches[:0]
+				visibleCount = min(height-3, len(options))
+				startIndex = max(0, selectedOption-visibleCount+1)
+				renderList(startIndex, selectedOption, options, visibleCount, searchTerm)
+			}
 		}
 	}
 }
