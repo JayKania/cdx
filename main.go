@@ -51,13 +51,11 @@ func main() {
 	buf := make([]byte, 32)
 	searchTerm := ""
 
-	
-	// +build !windows
 	if runtime.GOOS != "windows" {
 		// TODO: Figure out a better way to handle resizing, ranther than using this pointer spaghetti
 		handleReszing(&visibleCount, &selectedOption, &startIndex, &options, &searchTerm)
 	}
-	
+
 	for {
 		n, err := os.Stdin.Read(buf)
 		if err != nil {
