@@ -42,7 +42,7 @@ func main() {
 	startIndex := 0
 	options := buildOptions()
 	_, height, _ := term.GetSize(int(os.Stdout.Fd()))
-	visibleCount := min(height-1, len(options))
+	visibleCount := min(height-2, len(options))
 	renderList(startIndex, selectedOption, options, visibleCount)
 
 	// TODO: Figure out a better way to handle resizing, ranther than using this pointer spaghetti
@@ -92,7 +92,7 @@ func main() {
 					startIndex = 0
 					options = buildOptions()
 					_, height, _ = term.GetSize(int(os.Stdout.Fd()))
-					visibleCount = min(height-1, len(options))
+					visibleCount = min(height-2, len(options))
 					renderList(startIndex, selectedOption, options, visibleCount)
 				}
 			case 'D': // Left
@@ -105,7 +105,7 @@ func main() {
 					selectedOption = 0
 				}
 				_, height, _ := term.GetSize(int(os.Stdout.Fd()))
-				visibleCount = min(height-1, len(options))
+				visibleCount = min(height-2, len(options))
 				startIndex = max(0, selectedOption-visibleCount+1)
 				renderList(startIndex, selectedOption, options, visibleCount)
 			}

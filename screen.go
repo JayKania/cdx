@@ -9,6 +9,13 @@ import (
 	"golang.org/x/term"
 )
 
+// type UIState struct {
+// 	VisibleCount   int
+// 	SelectedOption int
+// 	StartIndex     int
+// 	Options        []string
+// }
+
 func clearScreen() {
 	fmt.Print(clear_screen)
 	fmt.Print(clear_scrollback)
@@ -21,14 +28,14 @@ func renderList(startIndex int, selected int, options []string, visibleCount int
 	clearScreen()
 
 	endIndex := min(startIndex+visibleCount, len(options))
-
+	cwd, _ := os.Getwd()
+	fmt.Printf("  %s cd %s %s \n", color_inverse, cwd, color_reset)
 	for i := startIndex; i < endIndex; i++ {
 		fmt.Print(clear_line)
 		fmt.Print(carriage_return)
 
 		width, _, _ := term.GetSize(int(os.Stdout.Fd()))
 		visibleText := truncateToWidth(options[i], width-2) // -2 for "> " or padding
-
 		if i == selected {
 			fmt.Printf("> %s%s%s\n", color_green, visibleText, color_reset)
 		} else {
@@ -45,7 +52,7 @@ func handleReszing(visibleCount *int, selectedOption *int, startIndex *int, opti
 	go func() {
 		for range resizeCh {
 			_, height, _ := term.GetSize(int(os.Stdout.Fd()))
-			*visibleCount = min(height-1, len(*options))
+			*visibleCount = min(height-2, len(*options))
 			if *selectedOption < *startIndex {
 				*startIndex = *selectedOption
 			} else if *selectedOption >= *startIndex+*visibleCount {
