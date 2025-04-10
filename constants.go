@@ -11,7 +11,7 @@ const (
 
 	carriage_return = "\r"
 
-	color_green   = "\033[32m"
-	color_reset   = "\033[0m"
-	color_gray    = "\033[90m"
+	color_green = "\033[32m"
+	color_reset = "\033[0m"
+	color_gray  = "\033[90m"
 )

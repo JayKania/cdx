@@ -31,8 +31,8 @@ func renderList(startIndex int, selected int, options []string, visibleCount int
 	cwd, _ := os.Getwd()
 	fmt.Printf("  %scd %s %s \n", color_gray, cwd, color_reset)
 	fmt.Print(carriage_return)
-	fmt.Printf("  %sSearch: %s%s\n", color_gray,searchTerm, color_reset)
-	
+	fmt.Printf("  %sSearch: %s%s\n", color_gray, searchTerm, color_reset)
+
 	for i := startIndex; i < endIndex; i++ {
 		fmt.Print(clear_line)
 		fmt.Print(carriage_return)

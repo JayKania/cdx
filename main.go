@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -48,7 +49,7 @@ func main() {
 
 	buf := make([]byte, 32)
 	searchTerm := ""
-	
+
 	// TODO: Figure out a better way to handle resizing, ranther than using this pointer spaghetti
 	handleReszing(&visibleCount, &selectedOption, &startIndex, &options, &searchTerm)
 
@@ -123,7 +124,7 @@ func main() {
 				renderList(startIndex, selectedOption, options, visibleCount, searchTerm)
 			}
 		}
-		
+
 		// Handle input
 		if n == 1 && isPrintable(buf[0]) {
 			searchTerm += sanitizeInput(string(buf[0]))
@@ -131,8 +132,8 @@ func main() {
 			_, height, _ := term.GetSize(int(os.Stdout.Fd()))
 			if len(matches) > 0 {
 				visibleCount = min(height-3, len(matches))
-				startIndex = 0;
-				selectedOption = 0;
+				startIndex = 0
+				selectedOption = 0
 				renderList(startIndex, selectedOption, matches, visibleCount, searchTerm)
 			} else {
 				visibleCount = min(height-3, len(options))
@@ -149,8 +150,8 @@ func main() {
 				_, height, _ := term.GetSize(int(os.Stdout.Fd()))
 				if len(matches) > 0 && len(searchTerm) > 0 {
 					visibleCount = min(height-3, len(matches))
-					startIndex = 0;
-					selectedOption = 0;
+					startIndex = 0
+					selectedOption = 0
 					renderList(startIndex, selectedOption, matches, visibleCount, searchTerm)
 				} else {
 					matches = matches[:0]
@@ -164,6 +165,25 @@ func main() {
 				startIndex = max(0, selectedOption-visibleCount+1)
 				renderList(startIndex, selectedOption, options, visibleCount, searchTerm)
 			}
+		}
+
+		// Handle Enter
+		if n == 1 && buf[0] == 0x0D {
+			cwd, _ := os.Getwd()
+			disableRawMode(oldState)
+			clearScreen()
+			fmt.Print(cursor_show)
+
+			var path string
+			if len(matches) > 0 {
+				path = fmt.Sprintf("cd \"%s/%s\"", cwd, matches[selectedOption])
+			} else {
+				path = fmt.Sprintf("cd \"%s/%s\"", cwd, options[selectedOption])
+			}
+
+			copyToClipboard(path)
+			fmt.Println("✅ Path copied to clipboard:", path)
+			os.Exit(0)
 		}
 	}
 }

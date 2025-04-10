@@ -9,6 +9,7 @@ CDX is a command-line tool written in Go that allows users to navigate and manag
 ## Features
 
 - Interactive file navigation
+- Fuzzy searching
 
 ## Installation
 
