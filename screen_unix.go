@@ -11,7 +11,7 @@ import (
 	"golang.org/x/term"
 )
 
-func handleReszing(visibleCount *int, selectedOption *int, startIndex *int, options *[]string, searchTerm *string) {
+func handleResizing(visibleCount *int, selectedOption *int, startIndex *int, options *[]string, searchTerm *string) {
 	// resize signal handling
 	resizeCh := make(chan os.Signal, 1)
 	signal.Notify(resizeCh, syscall.SIGWINCH)
