@@ -25,4 +25,4 @@ A minimal, fast terminal-based fuzzy directory navigator written in Go. Built wi
 3. Move it to a location in your `$PATH` and run it from anywhere, for example:
 
    ```bash
-   sudo cdx fcd /usr/local/bin
+   sudo cdx /usr/local/bin
