@@ -49,7 +49,11 @@ func main() {
 	matches := []string{}
 	_, height, _ := term.GetSize(int(os.Stdout.Fd()))
 	visibleCount := min(height-3, len(options))
-	renderList(startIndex, selectedOption, options, visibleCount, "")
+	if(len(options) == 0) {
+		disableRawMode(oldState)
+		fmt.Println("No directories found in the current directory.")
+		os.Exit(0)
+	}
 
 	buf := make([]byte, 32)
 	searchTerm := ""
