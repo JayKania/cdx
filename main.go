@@ -54,7 +54,8 @@ func main() {
 		fmt.Println("No directories found in the current directory.")
 		os.Exit(0)
 	}
-
+	renderList(startIndex, selectedOption, options, visibleCount, "")
+	
 	buf := make([]byte, 32)
 	searchTerm := ""
 
