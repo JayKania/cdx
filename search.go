@@ -85,9 +85,46 @@ func min(args ...int) int {
 	return min
 }
 
-func search(searchTerm string, options []string) []string {
-	maxDistance := 4
-	matches := FuzzySearch(searchTerm, options, maxDistance)
+// regularSearch performs a regular search for the search term in the options
+func regularSearch(searchTerm string, options []string) []MatchResult {
+	matches := []MatchResult{}
+	remainingOptions := []string{}
+
+	for _, option := range options {
+		if strings.HasPrefix(strings.ToLower(option), strings.ToLower(searchTerm)) {
+			matches = append(matches, MatchResult{
+				Text:     option,
+				Score:    100,
+				Distance: 0,
+			})
+		} else {
+			remainingOptions = append(remainingOptions, option)
+		}
+	}
+
+	for _, option := range remainingOptions {
+		if strings.Contains(strings.ToLower(option), strings.ToLower(searchTerm)) {
+			matches = append(matches, MatchResult{
+				Text:     option,
+				Score:    100,
+				Distance: 0,
+			})
+		}
+	}
+
+	return matches
+}
+
+func search(searchTerm string, options []string, fuzzyFlagPtr *bool) []string {
+
+	var matches []MatchResult
+
+	if *fuzzyFlagPtr {
+		maxDistance := 4
+		matches = FuzzySearch(searchTerm, options, maxDistance)
+	} else {
+		matches = regularSearch(searchTerm, options)
+	}
 
 	results := []string{}
 	for _, matches := range matches {

@@ -1,10 +1,11 @@
 # CDX
 
-A minimal, fast terminal-based fuzzy directory navigator written in Go. Built with a simple goal: let you **navigate using arrow keys**, search with fuzzy matching, and **copy the `cd` command** of your chosen path to your clipboard.
+A minimal, fast terminal-based directory navigator written in Go. Built with a simple goal: let you **navigate using arrow keys**, search directories, and **copy the `cd` command** of your chosen path to your clipboard.
 
 ## Features
 
-- 🔍 Fuzzy search through directories
+- 🔍 Regular search by default; enable fuzzy search with the `-fuzzy-search` flag:
+  - Example: `cdx -fuzzy-search`
 - ⌨️ Navigate with arrow keys:
   - ↑/↓ to move up and down
   - → to go into a directory
@@ -22,7 +23,8 @@ A minimal, fast terminal-based fuzzy directory navigator written in Go. Built wi
 2. Make it executable:
    ```bash
    chmod +x cdx
+   ```
 3. Move it to a location in your `$PATH` and run it from anywhere, for example:
-
    ```bash
    sudo mv cdx /usr/local/bin
+   ```

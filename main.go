@@ -1,11 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"slices"
 
 	"golang.org/x/term"
@@ -33,6 +33,9 @@ func buildOptions() []string {
 
 func main() {
 
+	fuzzyFlagPtr := flag.Bool("fuzzy-search", false, "Enable fuzzy search")
+	flag.Parse()
+
 	oldState := enableRawMode()
 	cleanup := func() {
 		clearScreen()
@@ -51,11 +54,8 @@ func main() {
 	buf := make([]byte, 32)
 	searchTerm := ""
 
-	if runtime.GOOS != "windows" {
-		// TODO: Figure out a better way to handle resizing, ranther than using this pointer spaghetti
-		handleResizing(&visibleCount, &selectedOption, &startIndex, &options, &searchTerm)
-	}
-
+	// TODO: Figure out a better way to handle resizing, ranther than using this pointer spaghetti
+	handleResizing(&visibleCount, &selectedOption, &startIndex, &options, &searchTerm)
 	for {
 		n, err := os.Stdin.Read(buf)
 		if err != nil {
@@ -131,7 +131,7 @@ func main() {
 		// Handle input
 		if n == 1 && isPrintable(buf[0]) {
 			searchTerm += sanitizeInput(string(buf[0]))
-			matches = search(searchTerm, options)
+			matches = search(searchTerm, options, fuzzyFlagPtr)
 			_, height, _ := term.GetSize(int(os.Stdout.Fd()))
 			if len(matches) > 0 {
 				visibleCount = min(height-3, len(matches))
@@ -149,7 +149,7 @@ func main() {
 		if n == 1 && buf[0] == 0x7f {
 			if len(searchTerm) > 0 {
 				searchTerm = searchTerm[:len(searchTerm)-1]
-				matches = search(searchTerm, options)
+				matches = search(searchTerm, options, fuzzyFlagPtr)
 				_, height, _ := term.GetSize(int(os.Stdout.Fd()))
 				if len(matches) > 0 && len(searchTerm) > 0 {
 					visibleCount = min(height-3, len(matches))
