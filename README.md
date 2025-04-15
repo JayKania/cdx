@@ -30,5 +30,5 @@ A minimal, fast terminal-based directory navigator written in Go. Built with a s
    ```
 5. Run the setup file to install and integrate CDX:
    ```bash
-   setup
+   ./setup
 6. Restart your terminal and run your cdx program from anywhere
