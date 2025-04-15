@@ -19,5 +19,5 @@ func enableRawMode() *term.State {
 // disableRawMode restores the terminal to its original state.
 func disableRawMode(oldState *term.State) {
 	defer term.Restore(int(os.Stdin.Fd()), oldState)
-	fmt.Print(cursor_show)
+	fmt.Fprint(os.Stderr, cursor_show)
 }

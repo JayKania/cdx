@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -26,15 +25,14 @@ func buildOptions() []string {
 		}
 	}
 
-	slices.Sort(dirOptions)
+	dirOptions = append(dirOptions, "../")
+	dirOptions = append(dirOptions, "./")
 
+	slices.Sort(dirOptions)
 	return dirOptions
 }
 
 func main() {
-
-	fuzzyFlagPtr := flag.Bool("fuzzy-search", false, "Enable fuzzy search")
-	flag.Parse()
 
 	oldState := enableRawMode()
 	cleanup := func() {
@@ -47,15 +45,10 @@ func main() {
 	startIndex := 0
 	options := buildOptions()
 	matches := []string{}
-	_, height, _ := term.GetSize(int(os.Stdout.Fd()))
+	_, height, _ := term.GetSize(int(os.Stderr.Fd()))
 	visibleCount := min(height-3, len(options))
-	if(len(options) == 0) {
-		disableRawMode(oldState)
-		fmt.Println("No directories found in the current directory.")
-		os.Exit(0)
-	}
 	renderList(startIndex, selectedOption, options, visibleCount, "")
-	
+
 	buf := make([]byte, 32)
 	searchTerm := ""
 
@@ -109,7 +102,7 @@ func main() {
 					selectedOption = 0
 					startIndex = 0
 					options = buildOptions()
-					_, height, _ = term.GetSize(int(os.Stdout.Fd()))
+					_, height, _ := term.GetSize(int(os.Stderr.Fd()))
 					visibleCount = min(height-3, len(options))
 					searchTerm = ""
 					matches = matches[:0]
@@ -124,7 +117,7 @@ func main() {
 				if selectedOption == -1 {
 					selectedOption = 0
 				}
-				_, height, _ := term.GetSize(int(os.Stdout.Fd()))
+				_, height, _ := term.GetSize(int(os.Stderr.Fd()))
 				visibleCount = min(height-3, len(options))
 				startIndex = max(0, selectedOption-visibleCount+1)
 				matches = matches[:0]
@@ -136,8 +129,8 @@ func main() {
 		// Handle input
 		if n == 1 && isPrintable(buf[0]) {
 			searchTerm += sanitizeInput(string(buf[0]))
-			matches = search(searchTerm, options, fuzzyFlagPtr)
-			_, height, _ := term.GetSize(int(os.Stdout.Fd()))
+			matches = search(searchTerm, options[2:])
+			_, height, _ := term.GetSize(int(os.Stderr.Fd()))
 			if len(matches) > 0 {
 				visibleCount = min(height-3, len(matches))
 				startIndex = 0
@@ -154,8 +147,8 @@ func main() {
 		if n == 1 && buf[0] == 0x7f {
 			if len(searchTerm) > 0 {
 				searchTerm = searchTerm[:len(searchTerm)-1]
-				matches = search(searchTerm, options, fuzzyFlagPtr)
-				_, height, _ := term.GetSize(int(os.Stdout.Fd()))
+				matches = search(searchTerm, options[2:])
+				_, height, _ := term.GetSize(int(os.Stderr.Fd()))
 				if len(matches) > 0 && len(searchTerm) > 0 {
 					visibleCount = min(height-3, len(matches))
 					startIndex = 0
@@ -180,17 +173,16 @@ func main() {
 			cwd, _ := os.Getwd()
 			disableRawMode(oldState)
 			clearScreen()
-			fmt.Print(cursor_show)
+			fmt.Fprint(os.Stderr, cursor_show)
 
 			var path string
 			if len(matches) > 0 {
-				path = fmt.Sprintf("cd \"%s/%s\"", cwd, matches[selectedOption])
+				path = fmt.Sprintf("%s/%s", cwd, matches[selectedOption])
 			} else {
-				path = fmt.Sprintf("cd \"%s/%s\"", cwd, options[selectedOption])
+				path = fmt.Sprintf("%s/%s", cwd, options[selectedOption])
 			}
 
-			copyToClipboard(path)
-			fmt.Println("✅ Path copied to clipboard:", path)
+			fmt.Println(path)
 			os.Exit(0)
 		}
 	}

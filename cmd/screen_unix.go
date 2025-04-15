@@ -18,7 +18,7 @@ func handleResizing(visibleCount *int, selectedOption *int, startIndex *int, opt
 
 	go func() {
 		for range resizeCh {
-			_, height, _ := term.GetSize(int(os.Stdout.Fd()))
+			_, height, _ := term.GetSize(int(os.Stderr.Fd()))
 			*visibleCount = min(height-3, len(*options))
 			if *selectedOption < *startIndex {
 				*startIndex = *selectedOption
